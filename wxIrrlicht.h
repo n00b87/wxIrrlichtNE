@@ -87,6 +87,7 @@ class wxIrrlicht : public wxControl {
         bool m_windowIsActive;
         bool m_forceWindowInActive;
         bool m_forceWindowActive;
+        bool rendering;
 
 		enum {
 			ID_IRR_TIMER=1000

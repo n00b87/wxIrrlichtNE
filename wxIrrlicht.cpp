@@ -110,6 +110,7 @@ actual_params->WindowId = (HWND)this->GetHandle();
 
     parent_window->Connect( wxEVT_SIZE, wxSizeEventHandler( wxIrrlicht::OnParentSize ), NULL, this );
     m_forceWindowActive = true;
+    rendering = false;
 	Refresh();
 
 }//InitIrr()
@@ -123,9 +124,8 @@ void wxIrrlicht::StopRendering(){
 }//StopRendering()
 
 void wxIrrlicht::Render() {
-    static bool rendering = false;
 
-    if (rendering || !m_pDevice->run()) {
+    if (rendering) {
         return;
 	}//if
 
@@ -145,9 +145,9 @@ void wxIrrlicht::Render() {
     m_forceWindowActive = false;
 
     rendering = true;
-    OnPreRender();
+    //OnPreRender();
     OnRender();
-    OnPostRender();
+    //OnPostRender();
     rendering = false;
 }//Render()
 
@@ -159,16 +159,14 @@ void wxIrrlicht::OnCreateScene() {
 }//OnCreateScene()
 
 void wxIrrlicht::OnRender() {
-    if (m_windowIsActive)
-    {
         // draw everything here
         m_pDriver->beginScene(true, true, SColor(255,0,255,0));
         m_pSceneManager->drawAll();
         m_pGuiEnvironment->drawAll();
         m_pDriver->endScene();
-    }
-    else
-        m_pDevice->yield();
+
+        Refresh();
+
 }//OnRender()
 
 void wxIrrlicht::OnPostRender() {
@@ -188,9 +186,9 @@ void wxIrrlicht::OnPostRender() {
 }//OnPostRender()
 
 void wxIrrlicht::OnPaint(wxPaintEvent& event){
+    Render();
     wxPaintDC paint_dc(this);
 
-    Render();
 }//OnPaint()
 
 void wxIrrlicht::OnParentSize(wxSizeEvent& event)
@@ -228,7 +226,7 @@ void wxIrrlicht::OnSize(wxSizeEvent& event) {
 }//OnSize
 
 void wxIrrlicht::OnTimer(wxTimerEvent& event) {
-    Render();
+    m_pDevice->getTimer()->tick();
 }
 
 void wxIrrlicht::OnMouse(wxMouseEvent& event) {
@@ -266,10 +264,6 @@ void wxIrrlicht::OnMouse(wxMouseEvent& event) {
 
     m_pDevice->postEventFromUser(sevt);
 
-    if (!m_Timer.IsRunning()) {
-        Render();
-	}//if
-
     event.Skip();
 }//OnMouse()
 
@@ -290,10 +284,6 @@ void wxIrrlicht::OnKey(wxKeyEvent& event) {
 #endif
 
     m_pDevice->postEventFromUser(sevt);
-
-    if (!m_Timer.IsRunning()) {
-        Render();
-	}//if
 
     event.Skip();
 }//OnKey()
